@@ -4,6 +4,7 @@ services:
     container_name: gitlab
     restart: always
     hostname: ${GITLAB_HOST}
+    shm_size: 256m
     environment:
       GITLAB_OMNIBUS_CONFIG: |
         external_url '${GITLAB_URL}'
@@ -12,6 +13,26 @@ services:
         gitlab_rails['gitlab_shell_ssh_port'] = ${GITLAB_SSH_PORT}
         nginx['listen_port'] = 80
         nginx['redirect_http_to_https'] = false
+        
+        # Fix shared memory issues for Prometheus
+        prometheus['enable'] = ${PROMETHEUS_ENABLE}
+        prometheus['flags'] = {
+          'storage.tsdb.path' => "/var/opt/gitlab/prometheus/data",
+          'storage.tsdb.retention.time' => "15d",
+          'config.file' => "/var/opt/gitlab/prometheus/prometheus.yml"
+        }
+        
+        # Reduce Prometheus scrape frequency to reduce shm pressure
+        prometheus['scrape_interval'] = ${PROMETHEUS_SCRAPE_INTERVAL}
+        prometheus['scrape_timeout'] = 10
+        
+        # Grafana configuration
+        grafana['enable'] = ${GRAFANA_ENABLE}
+        
+        # Reduce memory pressure
+        puma['worker_processes'] = 2
+        puma['max_threads'] = 4
+        sidekiq['max_concurrency'] = 10
         
         # SMTP Configuration
         gitlab_rails['smtp_enable'] = ${SMTP_ENABLE}
@@ -33,6 +54,9 @@ services:
       - ./data/logs:/var/log/gitlab
       - ./data/data:/var/opt/gitlab
       - ${BACKUP_PATH}:/backups
+    tmpfs:
+      - /dev/shm:size=256m,noexec,nosuid,nodev
+      - /tmp:size=512m,noexec,nosuid,nodev
     networks:
       - gitlab_net
     healthcheck:
