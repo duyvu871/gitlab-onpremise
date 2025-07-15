@@ -1,12 +1,62 @@
 # 🐙 GitLab On-Premise - Docker Setup
 
-Triển khai GitLab Community Edition (CE) trên máy chủ riêng bằng Docker Compose, với reverse proxy qua Nginx, domain tách biệt cho SSH, hỗ trợ backup/restore.
+Triển k## 🚀 Triển khai nhanh
+
+### Quick Setup (Recommended)
+
+```bash
+git clone https://github.com/duyvu871/gitlab-onpremise.git
+cd gitlab-onpremise
+
+# One-command setup
+./scripts/setup-gitlab.sh
+```
+
+### Manual Setup
+
+### 1. Clone repo & cấu hình biến môi trường
+
+```bash
+git clone https://github.com/duyvu871/gitlab-onpremise.git
+cd gitlab-onpremise
+cp .env.example .env
+# Sửa file .env theo tên miền, port của bạn
+```
+
+### 2. Khởi động GitLab
+
+```bash
+docker compose up -d
+```
+
+Đợi 3–5 phút để GitLab khởi tạo lần đầu.
+
+### 3. Cấu hình GitLab Runner (CI/CD)
+
+```bash
+# Register runner tự động
+./scripts/register-runner.sh docker
+
+# Hoặc register cả Docker và Shell runner
+./scripts/register-runner.sh both
+```
+
+### 4. Truy cập GitLab
+
+Truy cập: `http://gitlab.example.com:8088`
+
+**Login đầu tiên:**
+- Username: `root`
+- Password: Xem trong logs `docker logs gitlab | grep "Password:"` Edition (CE) trên máy chủ riêng bằng Docker Compose, với reverse proxy qua Nginx, domain tách biệt cho SSH, hỗ trợ backup/restore.
 
 ---
 
 ## 📦 Tính năng
 
 - Triển khai GitLab CE `16.3.4` bằng Docker
+- **GitLab Runner** tích hợp với Docker executor
+- **Backup tự động** theo lịch với retention policy
+- **Resource management** để tối ưu hiệu suất
 - Tách riêng domain SSH (`ssh.gitlab.example.com`)
 - Reverse proxy qua Nginx (có SSL)
 - Custom port để tránh xung đột hệ thống
@@ -147,6 +197,7 @@ git clone ssh://git@ssh.gitlab.example.com:2222/group/project.git
 
 ## ✅ Câu lệnh hữu ích
 
+### GitLab Management
 ```bash
 # Reconfigure GitLab (sau khi sửa config)
 docker exec -it gitlab gitlab-ctl reconfigure
@@ -163,9 +214,49 @@ user.password_confirmation = 'newpassword'
 user.save!
 ```
 
+### GitLab Runner Management
+```bash
+# Kiểm tra runner status
+./scripts/register-runner.sh status
+
+# List registered runners
+./scripts/register-runner.sh list
+
+# Register new runner
+./scripts/register-runner.sh docker
+
+# Remove all runners
+./scripts/register-runner.sh remove
+```
+
+### Backup & Resource Management
+```bash
+# Tạo backup thủ công
+./scripts/backup.sh
+
+# Kiểm tra resource usage
+./scripts/resource-monitor.sh check
+
+# Optimize performance
+./scripts/resource-monitor.sh optimize
+
+# Health check tổng thể
+./scripts/gitlab-health.sh check
+```
+
 ---
 
-## 📄 Giấy phép
+## � Tài liệu chi tiết
+
+- **[GitLab Runner Guide](docs/GITLAB_RUNNER_GUIDE.md)** - Hướng dẫn cấu hình CI/CD Runner
+- **[Config Guide](docs/CONFIG_GUIDE.md)** - Hướng dẫn cấu hình chi tiết
+- **[Resource Management](docs/RESOURCE_MANAGEMENT.md)** - Quản lý tài nguyên và performance
+- **[Troubleshooting](docs/TROUBLESHOOTING.md)** - Khắc phục sự cố thường gặp
+- **[Scripts README](scripts/README.md)** - Hướng dẫn sử dụng scripts
+
+---
+
+## �📄 Giấy phép
 
 MIT License
 

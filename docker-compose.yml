@@ -5,6 +5,14 @@ services:
     restart: always
     hostname: ${GITLAB_HOST}
     shm_size: 256m
+    deploy:
+      resources:
+        limits:
+          memory: ${GITLAB_MEMORY_LIMIT:-8G}
+          cpus: '${GITLAB_CPU_LIMIT:-4}'
+        reservations:
+          memory: ${GITLAB_MEMORY_RESERVATION:-4G}
+          cpus: '${GITLAB_CPU_RESERVATION:-2}'
     environment:
       GITLAB_OMNIBUS_CONFIG: |
         external_url '${GITLAB_URL}'
@@ -30,9 +38,33 @@ services:
         grafana['enable'] = ${GRAFANA_ENABLE}
         
         # Reduce memory pressure
-        puma['worker_processes'] = 2
-        puma['max_threads'] = 4
-        sidekiq['max_concurrency'] = 10
+        puma['worker_processes'] = ${PUMA_WORKERS:-2}
+        puma['max_threads'] = ${PUMA_MAX_THREADS:-4}
+        puma['min_threads'] = ${PUMA_MIN_THREADS:-1}
+        
+        # Sidekiq configuration (CI/CD jobs)
+        sidekiq['max_concurrency'] = ${SIDEKIQ_CONCURRENCY:-5}
+        sidekiq['queue_selector'] = true
+        sidekiq['interval'] = 5
+        
+        # GitLab Runner limits (if using built-in runner)
+        gitlab_rails['gitlab_shell_ssh_port'] = ${GITLAB_SSH_PORT}
+        gitlab_rails['gitlab_default_projects_limit'] = ${DEFAULT_PROJECTS_LIMIT:-100}
+        gitlab_rails['gitlab_default_can_create_group'] = true
+        
+        # Database connection pool
+        postgresql['max_connections'] = ${POSTGRES_MAX_CONNECTIONS:-100}
+        postgresql['shared_buffers'] = '${POSTGRES_SHARED_BUFFERS:-512MB}'
+        postgresql['work_mem'] = '${POSTGRES_WORK_MEM:-16MB}'
+        postgresql['maintenance_work_mem'] = '${POSTGRES_MAINTENANCE_WORK_MEM:-64MB}'
+        
+        # Redis configuration
+        redis['maxmemory'] = '${REDIS_MAX_MEMORY:-256MB}'
+        redis['maxmemory_policy'] = 'allkeys-lru'
+        
+        # Disable resource-intensive features if needed
+        gitlab_rails['usage_ping_enabled'] = ${USAGE_PING_ENABLED:-false}
+        gitlab_rails['seat_link_enabled'] = ${SEAT_LINK_ENABLED:-false}
         
         # SMTP Configuration
         gitlab_rails['smtp_enable'] = ${SMTP_ENABLE}
@@ -83,6 +115,11 @@ services:
       - gitlab_net
     depends_on:
       - gitlab
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
     entrypoint: |
       sh -c '
         echo "Installing cron and required packages..."
@@ -95,6 +132,37 @@ services:
         cron -f
       '
 
+  gitlab-runner:
+    image: gitlab/gitlab-runner:latest
+    container_name: gitlab-runner
+    restart: unless-stopped
+    volumes:
+      - ./config/runner-config.toml:/etc/gitlab-runner/config.toml
+      - /var/run/docker.sock:/var/run/docker.sock
+      - gitlab-runner-cache:/cache
+      - ./scripts:/scripts:ro
+    networks:
+      - gitlab_net
+    depends_on:
+      - gitlab
+    deploy:
+      resources:
+        limits:
+          memory: ${RUNNER_MEMORY_LIMIT:-2G}
+          cpus: '${RUNNER_CPU_LIMIT:-2}'
+        reservations:
+          memory: ${RUNNER_MEMORY_RESERVATION:-512M}
+          cpus: '${RUNNER_CPU_RESERVATION:-0.5}'
+    environment:
+      - DOCKER_TLS_CERTDIR=""
+      - DOCKER_DRIVER=overlay2
+      - GITLAB_URL=${GITLAB_URL}
+    privileged: true
+
 networks:
   gitlab_net:
     driver: bridge
+
+volumes:
+  gitlab-runner-cache:
+    driver: local

@@ -213,6 +213,165 @@ sudo systemctl reload nginx
 
 ---
 
+## ⏱️ Lỗi Timeout "GitLab is taking too much time to respond"
+
+### **Lỗi:**
+```
+We're sorry. GitLab is taking too much time to respond.
+Try refreshing the page, or going back and attempting the action again.
+Please contact your GitLab administrator if this problem persists.
+```
+
+### **Nguyên nhân:**
+- GitLab đang quá tải về CPU/Memory
+- Quá nhiều CI/CD jobs chạy đồng thời
+- Database queries chậm
+- Insufficient resources
+
+### **Giải pháp:**
+
+#### 1. **Kiểm tra tài nguyên (khuyến nghị):**
+```bash
+./scripts/resource-monitor.sh check
+./scripts/resource-monitor.sh ci-stats
+```
+
+#### 2. **Optimization tự động:**
+```bash
+./scripts/resource-monitor.sh optimize
+```
+
+#### 3. **Giảm tải ngay lập tức:**
+```bash
+# Giảm resource usage
+./scripts/resource-monitor.sh scale-down
+
+# Restart GitLab
+docker compose restart gitlab
+
+# Dọn dẹp tài nguyên
+./scripts/resource-monitor.sh cleanup
+```
+
+#### 4. **Cấu hình resource limits:**
+Sửa `.env` để giới hạn tài nguyên:
+```env
+# Giảm workers
+PUMA_WORKERS=1
+SIDEKIQ_CONCURRENCY=2
+
+# Giảm database connections
+POSTGRES_MAX_CONNECTIONS=30
+
+# Giảm memory cho container
+GITLAB_MEMORY_LIMIT=4G
+GITLAB_CPU_LIMIT=2
+```
+
+#### 5. **Disable các tính năng không cần thiết:**
+```env
+PROMETHEUS_ENABLE=false
+USAGE_PING_ENABLED=false
+SEAT_LINK_ENABLED=false
+```
+
+#### 6. **Tăng timeout trong nginx (nếu dùng reverse proxy):**
+```nginx
+# Trong nginx config
+proxy_connect_timeout 300s;
+proxy_send_timeout 300s;
+proxy_read_timeout 300s;
+client_max_body_size 1G;
+```
+
+---
+
+## 🚀 CI/CD Resource Management
+
+### **Vấn đề:**
+- CI/CD jobs chiếm quá nhiều tài nguyên
+- Server bị chậm khi có nhiều pipeline chạy
+
+### **Giải pháp:**
+
+#### 1. **Giới hạn concurrent jobs:**
+Sửa runner config (`config/runner-config.toml`):
+```toml
+concurrent = 2  # Chỉ cho phép 2 job chạy đồng thời
+```
+
+#### 2. **Resource limits cho mỗi job:**
+```toml
+[runners.docker]
+  memory = "1g"        # Giới hạn RAM cho mỗi job
+  cpus = "1.0"         # Giới hạn CPU cores
+  memory_swap = "2g"   # Giới hạn swap
+```
+
+#### 3. **Monitoring CI/CD load:**
+```bash
+# Xem jobs đang chạy
+./scripts/resource-monitor.sh ci-stats
+
+# Monitor real-time
+./scripts/resource-monitor.sh monitor
+```
+
+#### 4. **Cleanup CI/CD data:**
+```bash
+# Dọn dẹp artifacts và logs cũ
+./scripts/resource-monitor.sh cleanup
+```
+
+#### 5. **Pipeline optimization:**
+- Sử dụng cache hiệu quả
+- Chia nhỏ jobs thành stages
+- Sử dụng `only/except` rules để giảm số jobs
+- Parallel jobs hợp lý
+
+### **Cấu hình mẫu .gitlab-ci.yml:**
+```yaml
+# Giới hạn resources trong pipeline
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+
+stages:
+  - build
+  - test
+  - deploy
+
+# Cache để giảm tải
+cache:
+  paths:
+    - node_modules/
+    - vendor/
+
+build:
+  stage: build
+  script:
+    - echo "Building..."
+  # Chỉ chạy khi cần thiết
+  only:
+    - main
+    - develop
+  # Timeout cho job
+  timeout: 30 minutes
+
+test:
+  stage: test
+  script:
+    - echo "Testing..."
+  # Chạy parallel để nhanh hơn nhưng giới hạn số lượng
+  parallel: 2
+  only:
+    changes:
+      - "src/**/*"
+      - "tests/**/*"
+```
+
+---
+
 ## 🔄 Lỗi Backup/Restore
 
 ### **Lỗi:**
