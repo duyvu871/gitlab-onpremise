@@ -7,13 +7,13 @@
 .env
 
 # GitLab data volumes
-data/config/
-data/logs/
-data/data/
+data/config/*
+data/logs/*
+data/data/*
 
 # Backup files
-backups/
-backup/
+backups/*
+backup/*
 *.tar
 *.tar.gz
 *.tar.bz2
