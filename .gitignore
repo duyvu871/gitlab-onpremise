@@ -1,0 +1,72 @@
+# GitLab On-Premise - Ignore sensitive data
+
+# Environment configuration
+.env.local
+.env.production
+.env.*.local
+.env
+
+# GitLab data volumes
+data/config/
+data/logs/
+data/data/
+
+# Backup files
+backups/
+backup/
+*.tar
+*.tar.gz
+*.tar.bz2
+*.zip
+
+# SSL certificates
+certs/
+*.pem
+*.key
+*.crt
+*.csr
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# Docker volumes (if using named volumes)
+gitlab-config/
+gitlab-logs/
+gitlab-data/
+
+# OS specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Secrets and sensitive files
+secrets/
+*secrets*
+*password*
+*key*
+gitlab-secrets.json
+
+# Monitoring and metrics
+prometheus/
+grafana/
+
+# Database dumps
+*.sql
+*.dump
