@@ -2,6 +2,8 @@
 
 Tài liệu này hướng dẫn chi tiết cách cấu hình và tùy chỉnh GitLab CE trên Docker cho môi trường on-premise.
 
+> 👨‍💼 **Cần hướng dẫn về tài khoản admin?** Xem [Admin Guide](ADMIN_GUIDE.md)
+
 ---
 
 ## 🔧 Cấu hình biến môi trường (.env)
@@ -24,11 +26,17 @@ GITLAB_HTTP_PORT=8088
 # Port SSH cho GitLab
 GITLAB_SSH_PORT=2222
 
+# Cấu hình Admin
+GITLAB_ROOT_PASSWORD=YourSecurePassword123!  # Mật khẩu root (thay đổi ngay!)
+GITLAB_ROOT_EMAIL=admin@ssit.company.com      # Email của admin
+
 # Cấu hình backup
 BACKUP_SCHEDULE=0 2 * * *  # Backup hàng ngày lúc 2:00 AM
 BACKUP_RETENTION_DAYS=7    # Giữ backup trong 7 ngày
 BACKUP_PATH=./backups      # Thư mục lưu backup
 ```
+
+> ⚠️ **Bảo mật**: Thay đổi `GITLAB_ROOT_PASSWORD` ngay lập tức sau khi cài đặt!
 
 ### Cấu hình SMTP (Email)
 

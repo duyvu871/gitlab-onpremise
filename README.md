@@ -10,9 +10,14 @@ cd gitlab-onpremise
 
 # One-command setup
 ./scripts/setup-gitlab.sh
-```
+`## 📚 Tài liệu chi tiết
 
-### Manual Setup
+- **[Admin Guide](docs/ADMIN_GUIDE.md)** - 👨‍💼 Hướng dẫn quản trị GitLab (tài khoản admin, user management)
+- **[GitLab Runner Guide](docs/GITLAB_RUNNER_GUIDE.md)** - Hướng dẫn cấu hình CI/CD Runner
+- **[Config Guide](docs/CONFIG_GUIDE.md)** - Hướng dẫn cấu hình chi tiết
+- **[Resource Management](docs/RESOURCE_MANAGEMENT.md)** - Quản lý tài nguyên và performance
+- **[Troubleshooting](docs/TROUBLESHOOTING.md)** - Khắc phục sự cố thường gặp
+- **[Scripts README](scripts/README.md)** - Hướng dẫn sử dụng scripts## Manual Setup
 
 ### 1. Clone repo & cấu hình biến môi trường
 
@@ -47,7 +52,10 @@ Truy cập: `http://gitlab.example.com:8088`
 
 **Login đầu tiên:**
 - Username: `root`
-- Password: Xem trong logs `docker logs gitlab | grep "Password:"` Edition (CE) trên máy chủ riêng bằng Docker Compose, với reverse proxy qua Nginx, domain tách biệt cho SSH, hỗ trợ backup/restore.
+- Password: 
+  - **Nếu đã cấu hình trong .env**: Sử dụng `GITLAB_ROOT_PASSWORD`
+  - **Nếu chưa cấu hình**: Xem trong logs `docker logs gitlab | grep "Password:"`
+  - **Hoặc sử dụng script**: `./scripts/admin-manager.sh get-password` Edition (CE) trên máy chủ riêng bằng Docker Compose, với reverse proxy qua Nginx, domain tách biệt cho SSH, hỗ trợ backup/restore.
 
 ---
 

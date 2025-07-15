@@ -4,7 +4,13 @@ Thư mục này chứa các script để quản lý GitLab on-premise.
 
 ## 📋 Danh sách Scripts
 
-### 🔄 Backup & Restore
+### �‍💼 Admin Management
+
+| Script | Mô tả | Sử dụng |
+|--------|-------|---------|
+| `admin-manager.sh` | Quản lý tài khoản admin GitLab | `./admin-manager.sh [command]` |
+
+### �🔄 Backup & Restore
 
 | Script | Mô tả | Sử dụng |
 |--------|-------|---------|
@@ -13,7 +19,35 @@ Thư mục này chứa các script để quản lý GitLab on-premise.
 | `backup-cron.sh` | Script backup tự động (chạy trong container) | Tự động theo lịch |
 | `backup-manager.sh` | Quản lý backup tổng hợp | `./backup-manager.sh [command]` |
 
-### 🚀 Sử dụng nhanh
+### �‍💼 Admin Management
+
+```bash
+# Lấy mật khẩu root ban đầu
+./scripts/admin-manager.sh get-password
+
+# Reset mật khẩu root
+./scripts/admin-manager.sh reset-password
+
+# Tạo user admin mới
+./scripts/admin-manager.sh create-admin newadmin admin@company.com
+
+# Liệt kê tất cả admin
+./scripts/admin-manager.sh list-admins
+
+# Cấp quyền admin cho user
+./scripts/admin-manager.sh grant-admin username
+
+# Thu hồi quyền admin
+./scripts/admin-manager.sh revoke-admin username
+
+# Xem thông tin user
+./scripts/admin-manager.sh user-info username
+
+# Mở Rails console
+./scripts/admin-manager.sh console
+```
+
+### �🚀 Sử dụng nhanh
 
 ```bash
 # Tạo backup thủ công
