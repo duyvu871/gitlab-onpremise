@@ -174,12 +174,3 @@ MIT License
 ## 👤 Tác giả
 
 > Nếu bạn thấy hữu ích, hãy ⭐️ repo này hoặc fork lại để tùy chỉnh theo hệ thống của bạn!
-
-```
-
----
-
-Bạn có thể:
-- Đổi `gitlab.example.com` theo domain của bạn.
-- Thêm phần "Troubleshooting" nếu muốn hướng dẫn sửa lỗi thường gặp.
-- Đặt file này tại: `gitlab-onpremise/README.md`
