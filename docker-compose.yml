@@ -1,6 +1,6 @@
 services:
   gitlab:
-    image: gitlab/gitlab-ce:17.8.7-ce.0
+    image: gitlab/gitlab-ce:16.11.10-ce.0
     container_name: gitlab
     restart: always
     hostname: ${GITLAB_HOST}
@@ -104,7 +104,7 @@ services:
       start_period: 60s
 
   gitlab-backup:
-    image: gitlab/gitlab-ce:17.8.7-ce.0
+    image: gitlab/gitlab-ce:16.11.10-ce.0
     container_name: gitlab-backup
     restart: unless-stopped
     environment:
