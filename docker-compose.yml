@@ -60,6 +60,8 @@ services:
         gitlab_rails['gitlab_default_can_create_group'] = true
         
         # Database connection pool
+        postgresql['listen_address'] = '0.0.0.0'
+        postgresql['port'] = 5432
         postgresql['max_connections'] = ${POSTGRES_MAX_CONNECTIONS:-100}
         postgresql['shared_buffers'] = '${POSTGRES_SHARED_BUFFERS:-512MB}'
         postgresql['work_mem'] = '${POSTGRES_WORK_MEM:-16MB}'
@@ -88,6 +90,7 @@ services:
     ports:
       - "${GITLAB_HTTP_PORT}:80"
       - "${GITLAB_SSH_PORT}:22"
+      - "127.0.0.1:5442:5432"
     volumes:
       - ./data/config:/etc/gitlab
       - ./data/logs:/var/log/gitlab
