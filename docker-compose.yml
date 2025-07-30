@@ -67,6 +67,20 @@ services:
         postgresql['work_mem'] = '${POSTGRES_WORK_MEM:-16MB}'
         postgresql['maintenance_work_mem'] = '${POSTGRES_MAINTENANCE_WORK_MEM:-64MB}'
         
+        # PostgreSQL Authentication Configuration
+        postgresql['trust_auth_cidr_addresses'] = %w(127.0.0.1/32 172.16.0.0/12 192.168.0.0/16 10.0.0.0/8)
+        postgresql['sql_user'] = 'gitlab'
+        postgresql['sql_user_password'] = 'gitlab_password_123'
+        
+        # Enable md5 authentication for external connections
+        postgresql['custom_pg_hba_entries'] = {
+          'gitlab_local' => 'local all gitlab peer',
+          'gitlab_host' => 'host gitlabhq_production gitlab 127.0.0.1/32 md5',
+          'gitlab_docker' => 'host gitlabhq_production gitlab 172.16.0.0/12 md5',
+          'gitlab_docker2' => 'host gitlabhq_production gitlab 192.168.0.0/16 md5',
+          'gitlab_docker3' => 'host gitlabhq_production gitlab 10.0.0.0/8 md5'
+        }
+
         # Redis configuration
         redis['maxmemory'] = '${REDIS_MAX_MEMORY:-256MB}'
         redis['maxmemory_policy'] = 'allkeys-lru'
